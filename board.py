@@ -10,6 +10,8 @@ class Board(object):
     -----
     bull : dict
         ブルの種類に対応したpoint
+    total : int
+        ボード半径
     Notes
     -----
         単位(mm)
@@ -21,6 +23,8 @@ class Board(object):
         duble = 20
         totla = 198
     """
+    total = 198
+
     def __init__(self, bull_type="fat"):
         """
         Parameters
