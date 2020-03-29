@@ -47,15 +47,19 @@ class ArrangeHelper(object):
         cls.out_type = args.out_type
         
     @classmethod
-    def search(cls, point, get=[], bull_type="fat", out_type="everything"):
+    def search(cls, point, get_init=[], bull_type="fat", out_type="everything"):
         """
         1ラウンドで上がれるかを確認
         Parameters
         -----
         point : int
             ラウンド最初のポイント
+        get_init : 
+            すでに確定している得点
         bull_type : str
             ブルのタイプ
+        out_type : str
+            上がり方
         
         Returns
         -----
@@ -67,21 +71,23 @@ class ArrangeHelper(object):
         
         #引数チェック
         cls._check_args(bull_type=bull_type, out_type=out_type)
+        cls.get_init = get_init
         
         #組み合わせList
         cls.finishable_points = []
-        #cls
-        cls.under_180_list = []
         
         #探索
         if out_type == "everything":
-            cls._search_points(point, get=get, out_flag=True)
+            cls._search_points(point, get=get_init, out_flag=True)
         else:
-            cls._search_points(point, get=get, out_flag=False)
+            cls._search_points(point, get=get_init, out_flag=False)
+        
+        #すでに確定しているスローを消す
+        
         if len(cls.finishable_points) != 0:
             return True, sorted(cls.finishable_points, key=cls.calc_score, reverse=True)
         else:
-            return False, cls.under_180_list
+            return False, None
     
     @classmethod
     def _search_points(cls, point, get=[], out_flag=False):
@@ -103,12 +109,13 @@ class ArrangeHelper(object):
             return
         #3投投げたのでおしまい
         if len(get) == 3:
-            if point-sum(get) <= 180:
-                cls.under_180_list.append(get)
             return
         
+        #上がれるパターンを追加
         if cls._check_finish(unenough_point, out_flag):
-            points_list = sorted(get + [unenough_point])
+            #初期確定しているポイント分を削除
+            get_real = get[len(cls.get_init):]
+            points_list = sorted(get_real + [unenough_point])
             if points_list not in cls.finishable_points:
                 cls.finishable_points.append(points_list)
         #得点の候補作成
