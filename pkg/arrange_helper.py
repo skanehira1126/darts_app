@@ -79,7 +79,7 @@ class ArrangeHelper(object):
         else:
             cls._search_points(point, get=[], out_flag=False)
         if len(cls.finishable_points) != 0:
-            return True, cls.finishable_points
+            return True, sorted(cls.finishable_points, key=cls.calc_score, reverse=True)
         else:
             return False, cls.under_180_list
     
@@ -205,3 +205,49 @@ class ArrangeHelper(object):
             return True
         #どの条件も満たさない場合、False
         return False
+
+    @classmethod
+    def calc_score(cls, points):
+        """
+        ソートに用いる
+        スコアを計算。
+        1. bull_typeを検証
+            * sepa : bullを狙わない
+            * fat : bullを積極的に使う
+        2. out_typeを検証
+            * double : bull無視
+            * master : bull->double->tripleで優先順位をつける
+            * everything : single優先
+        
+        Parameters
+        ----- 
+        points : list of int
+            とるポイント
+        
+        Returns
+        -----
+        score : float
+            とるポイントの組み合わせのスコア
+        """
+        score = 0
+        if cls.bull_type == "sepa" or cls.out_type == "double": #sepaブルかdoubleアウトはブルを狙わない
+            if (25 in points) or (50 in points):
+                return 0
+            else:
+                return 1
+        if cls.out_type == "everything" : 
+            for p in points:
+                if p <= 20 :
+                    score = score + 1
+        elif cls.out_type == "master":
+            for p in sorted(points, reverse=True):
+                if p == 50 : # bullが一番良い
+                    score = score + 1.5
+                    break
+                if p % 2 == 0 : #次にダブル
+                    score = score + 1
+                    break
+            else: #最後トリプル
+                score = score + 0.5 
+        return score
+            
