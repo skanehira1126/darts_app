@@ -15,7 +15,7 @@ def init_logger(logger_name="logger", log_file_name="temp.log"):
     logger_format = Formatter("%(asctime)s [%(levelname)-8s] [%(process)d] %(module)-18s %(funcName)-10s %(lineno)4s: %(message)s")
     file_handler.setFormatter(logger_format)
     #ハンドラーの追加
-    logger.addHander(file_handler)
+    logger.addHandler(file_handler)
     
     
     
