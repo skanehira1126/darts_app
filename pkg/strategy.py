@@ -66,6 +66,7 @@ class Strategy(object):
                 aims = self.convert_point_list(aim_point_list)  
             else : #上がれない
                 arrange_point = self.get_arrange_point(left_point, get)
+                print("arrange_point: ",arrange_point)
                 if arrange_point is None: #アレンジできない
                     aims = self._get_aims_not_finishable(n_throw)
                 else: #アレンジできる
@@ -162,13 +163,15 @@ class Strategy(object):
             return None
         else :
             #残りトス数で絞る
-            arrange_point_list = arrange_point_list[arrange_point_list.n_throw == (3 - len(get))]
+            arrange_point_list = arrange_point_list[arrange_point_list.n_throw==(3-len(get))]
             if arrange_point_list.shape[0] == 0:
                 return None
             else :
                 #アレンジのための点数を取得できるか
                 for arrange_point in arrange_point_list.point.values:
-                    if left_point - arrange_point in self.all_score_master.point.values:
+                    #残りのトス数で取れるポイントの一覧を取得
+                    candidate_point_list = self.all_score_master[self.all_score_master.n_throw==(3-len(get))].point.values
+                    if left_point - arrange_point in candidate_point_list:
                         return int(arrange_point)
                 else:
                     return None
