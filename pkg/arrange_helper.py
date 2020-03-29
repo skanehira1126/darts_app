@@ -229,7 +229,7 @@ class ArrangeHelper(object):
         score : float
             とるポイントの組み合わせのスコア
         """
-        score = 3-len(points)
+        score = 4-len(points)
         if cls.bull_type == "sepa" or cls.out_type == "double": #sepaブルかdoubleアウトはブルを狙わない
             if (25 in points) or (50 in points):
                 return 0
