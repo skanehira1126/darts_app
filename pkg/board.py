@@ -79,15 +79,20 @@ class Board(object):
         -----
         point : int
             当たった場所に応じたポイント
+        place : str
+            当たった場所の名前
+        base_point : int
+            当たった場所の基礎ポイント
         """
         
-        place = self._get_place(r)
+        place, coef = self._get_place(r)
         if "bull" in place:
-            return self.bull[place]
-        elif place == "out_board":
-            return 0
+            return self.bull[place], place, 25
         else:
-            return self._get_point(theta)
+            base_point = self._get_point(theta)
+            if place == "out_board":
+                base_point = 0
+            return coef * base_point, place, base_point
     
     
     def _get_place(self, r):
@@ -103,20 +108,22 @@ class Board(object):
         -----
         place : str
             inner_bull, outer_bull, single, double, triple, out_board
+        coef : int
+            計算に用いるための係数
         """
         
         if 0 <= r <= 9:
-            return "inner_bull"
+            return "inner_bull", 1
         elif 9 < r <= 22:
-            return "outer_bull"
+            return "outer_bull", 1
         elif 22 < r <= 106 or 126 < r <= 178:
-            return "single"
+            return "single", 1
         elif 106 < r <= 126:
-            return "triple"
+            return "triple", 3
         elif 178 < r <= 198:
-            return "double"
+            return "double", 2
         else:
-            return "out board"
+            return "out board", 0
     
     def _get_point(self, theta):
         """
