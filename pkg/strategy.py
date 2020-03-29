@@ -67,9 +67,11 @@ class Strategy(object):
             else : #上がれない
                 arrange_point = self.get_arrange_point(left_point, get)
                 print("arrange_point: ",arrange_point)
+                print(get)
                 if arrange_point is None: #アレンジできない
                     aims = self._get_aims_not_finishable(n_throw)
                 else: #アレンジできる
+                    print(left_point, arrange_point)
                     _, point_list = ArrangeHelper.search(left_point-arrange_point, get_init=get
                                                          , bull_type=self.bull_type, out_type="everything")
                     #一番スコアが高い点の組み合わせを取得
@@ -171,7 +173,7 @@ class Strategy(object):
                 for arrange_point in arrange_point_list.point.values:
                     #残りのトス数で取れるポイントの一覧を取得
                     candidate_point_list = self.all_score_master[self.all_score_master.n_throw==(3-len(get))].point.values
-                    if left_point - arrange_point in candidate_point_list:
+                    if left_point - sum(get) - arrange_point in candidate_point_list:
                         return int(arrange_point)
                 else:
                     return None
