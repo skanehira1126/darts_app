@@ -10,7 +10,7 @@ class ArrangeHelper(object):
     point_master = {n_mark:[place*n_mark for place in range(1, 21)] for n_mark in range(1,4)}
 
     #{n_mark : String}
-    n_mark_master = {0:"Bull", 1:"Single", 2:"Double", 3:"Triple"}
+    n_mark_master = {0:"bull", 1:"single", 2:"double", 3:"triple"}
 
     @classmethod
     def _check_args(cls, **args):
@@ -47,7 +47,7 @@ class ArrangeHelper(object):
         cls.out_type = args.out_type
         
     @classmethod
-    def search(cls, point, bull_type="fat", out_type="everything"):
+    def search(cls, point, get=[], bull_type="fat", out_type="everything"):
         """
         1ラウンドで上がれるかを確認
         Parameters
@@ -75,9 +75,9 @@ class ArrangeHelper(object):
         
         #探索
         if out_type == "everything":
-            cls._search_points(point, get=[], out_flag=True)
+            cls._search_points(point, get=get, out_flag=True)
         else:
-            cls._search_points(point, get=[], out_flag=False)
+            cls._search_points(point, get=get, out_flag=False)
         if len(cls.finishable_points) != 0:
             return True, sorted(cls.finishable_points, key=cls.calc_score, reverse=True)
         else:
@@ -197,10 +197,10 @@ class ArrangeHelper(object):
         if out_flag :
             return True
         #満たしていない場合、確認
-        if cls.out_type == "double" and point%2 == 0 :
+        if cls.out_type == "double" and (point in cls.point_master[2] or point==50):
             return True
-        elif cls.out_type == "master" and (point%2 == 0
-                                          or point%3 == 0
+        elif cls.out_type == "master" and (point in cls.point_master[2]
+                                          or point in cls.point_master[3]
                                           or point in cls.point_master[0]):
             return True
         #どの条件も満たさない場合、False
@@ -229,12 +229,12 @@ class ArrangeHelper(object):
         score : float
             とるポイントの組み合わせのスコア
         """
-        score = 0
+        score = 3-len(points)
         if cls.bull_type == "sepa" or cls.out_type == "double": #sepaブルかdoubleアウトはブルを狙わない
             if (25 in points) or (50 in points):
                 return 0
             else:
-                return 1
+                return score
         if cls.out_type == "everything" : 
             for p in points:
                 if p <= 20 :
@@ -251,3 +251,43 @@ class ArrangeHelper(object):
                 score = score + 0.5 
         return score
             
+    @classmethod
+    def convert_point(cls, point, last_flag):
+        """
+        ポイントをボードの場所に変換
+        Parameters
+        -----
+        point : int 
+            狙うポイント
+        last_flag : bool
+            上がるチャンスかどうか
+        
+        Returns
+        -----
+        board_place : list of [int, str]
+            ボードの場所
+        
+        """
+            
+        if last_flag and cls.out_type != "everything":
+            if cls.out_type == "double":
+                return [int(point/2), "double"]
+            elif  cls.out_type == "master":
+                if point in cls.point_master[0]:
+                    return [25, "inner_bull"]
+                elif point in cls.point_master[2]:
+                    return [int(point/2), "double"]
+                elif point in cls.point_master[3]:
+                    return [int(point/3), "triple"]
+        else : #どれでも良い
+            for mark, points in cls.point_master.items():
+                if mark == 0:
+                    return [25, "inner_bull"]
+                else:
+                    if point in points:
+                        mark_str = cls.n_mark_master[mark]
+                        if mark_str == "bull" :
+                            mark_str = "inner_" + mark_str
+                        if mark_str == "single":
+                            mark_str = "outer_" + mark_str
+                        return [int(point/mark), mark_str]
