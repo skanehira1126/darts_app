@@ -50,6 +50,8 @@ class Throw(object):
         #np.arctan2(a, b):arctan(a/b)
         #戻り値：[-pi, pi]
         theta_hit = np.arctan2(y+y_d, x+x_d)
+        if theta_hit < 0 :
+            theta_hit += 2*np.pi
         
         return r_hit,theta_hit
     
