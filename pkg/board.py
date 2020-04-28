@@ -23,7 +23,6 @@ class Board(object):
         duble = 20
         totla = 198
     """
-    total = 198
 
     def __init__(self, bull_type="fat"):
         """
@@ -32,6 +31,9 @@ class Board(object):
         bull_type : str
             bullの種類
         """
+        #ボードの幅
+        self.total = 198
+        #Bullのパラメータ
         self.bull = {"inner_bull":50}
         if bull_type == "sepa":
             self.bull["outer_bull"] = 25

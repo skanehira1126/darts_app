@@ -5,12 +5,12 @@ from pkg.arrange_helper import ArrangeHelper
 
 class Strategy(object):
     
-    #スコア格納用dfのパラメータ
-    columns = ["point", "n_throw", "n_pattern"]
-    arrange_score_master = pd.DataFrame([], columns=columns)
-    all_score_master = pd.DataFrame([], columns=columns)
-    
     def __init__(self, bull_type, out_type):
+        #スコア格納用dfのパラメータ
+        self.columns = ["point", "n_throw", "n_pattern"]
+        self.arrange_score_master = pd.DataFrame([], columns=columns)
+        self.all_score_master = pd.DataFrame([], columns=columns)
+        #bullの種類と上がり方
         self.bull_type = bull_type
         self.out_type = out_type
         #スコア計算
