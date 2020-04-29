@@ -4,30 +4,70 @@ import pandas as pd
 from pkg.arrange_helper import ArrangeHelper
 
 class Strategy(object):
+    """
+    01の戦略
+    
+    Attributes
+    -----
+    bull_type : str (sepa or fat)
+        bullの種類
+    out_type : str (everything, master, double)
+        上がり方の種類
+    columns : list of str
+        上がり探索用のスコア格納用カラム名
+    arrange_score_master : pandas.DataFrame
+        アレンジ用のデータフレーム
+    all_score_master : pands.DataFrame
+        180以下のスコアの上がり方のパターン数
+        
+    
+    """
     
     def __init__(self, bull_type, out_type):
+        """
+        Parameters
+        -----
+        bull_type : str (sepa or fat)
+            bullの種類
+        out_type : str (everything, master, double)
+            上がり方の種類 
+        """
+        
+        #bullの種類と上がり方
+        self.bull_type = bull_type
+        self.out_type = out_type
+        
         #スコア格納用dfのパラメータ
         self.columns = ["point", "n_throw", "n_pattern"]
         self.arrange_score_master = pd.DataFrame([], columns=columns)
         self.all_score_master = pd.DataFrame([], columns=columns)
-        #bullの種類と上がり方
-        self.bull_type = bull_type
-        self.out_type = out_type
+        
         #スコア計算
         self._calc_scores()
     
     def _calc_scores(self):
+        """
+        スコアマスタを計算
+        アレンジ用
+        取得可能全て
+        
+        See Also
+        -----
+        arrange_helper
+        """
         for n_throw in range(1,4):
             for point in range(1, 60 * n_throw + 1):
                 #上がり条件がある得点一覧
+                #flagがTrueの時は、上がれる可能性がある
                 flag, point_list = ArrangeHelper.search(point, get_init=[0]*(3-n_throw)
                                                         , bull_type=self.bull_type, out_type=self.out_type)
                 if flag :
                     self.arrange_score_master = pd.concat([self.arrange_score_master
                                                            , pd.DataFrame([[point, n_throw, len(point_list)]]
                                                            , columns=self.columns)])
-                
+
                 #上がりを気にしないで取得できる得点一覧
+                #out_type をeverythingにしておくと180点以内で取得できる得点のパターンを全て計算できる
                 flag, point_list = ArrangeHelper.search(point, get_init=[0]*(3-n_throw)
                                                         , bull_type=self.bull_type, out_type="everything")
                 if flag :
@@ -37,7 +77,7 @@ class Strategy(object):
             #値をソート
             self.arrange_score_master = self.arrange_score_master.sort_values("n_pattern", axis=0, ascending=False)
             self.all_score_master = self.all_score_master.sort_values("n_pattern", axis=0, ascending=False)
-    
+
     def get_aims(self, left_point, get=[]):
         """
         狙う場所を返す
@@ -197,33 +237,74 @@ class Strategy(object):
             p_range = [1, left_point+1]
         return p_range
     
-#ダブルアウトの場合ブルは最終手段なのでsepa, fat関係ない
+#===== 上がりパターンの評価
+#得点パターンの評価をするためのスコアを計算する関数群
 def _sort_func_of_double(point):
+    """
+    double outの時の得点の評価
+    ダブルアウトの場合ブルは最終手段なのでsepa, fat関係ない
+    
+    Parameters
+    -----
+    point : int
+        評価する得点
+    
+    Returns
+    -----
+    score : int
+        得点の評価
+    """
+    #Bullは上がれるならいいが、最終手段
     if point == 50:
         return 0.1
+    #ダブルの場合good
     if point%2 == 0 and point <= 40:
         return 1
     else :
         return 0
 
 def _sort_func_of_sepa_master(point):
+    """
+    セパレートブルのmaster out
+    
+    Parameters
+    ----- 
+    point : int
+        評価する得点
+    """
+    #double tripleで割れない時はだめ
     if point%2 != 0 and point%3 != 0:
         return 0
+    #bullはseparateなので狙うのはあまり嬉しくない
     if point in [25, 50]:
         return 0.1
+    #doubleはいいよね
     if point%2 == 0 and point <= 40:
         return 1
-    if point%2 == 3:
+    #tripleもまあ上がれるならいいよね
+    if point%3 == 0:
         return 0.5
 
 
 def _sort_func_of_fat_master(point):
+    """
+    fatブルのmaster out
+    
+    Parameters
+    ----- 
+    point : int
+        評価する得点
+    """
+    #double tripleで割れない時はだめ
     if point%2 != 0 and point%3 != 0:
         return 0
+    #Bullは非常にいい
     if point == 50:
         return 1.5
+    #doubleはいいよね
     if point%2 == 0 and point <= 40:
         return 1
+    #tripleもまあ上がれるならいいよね
     if point%3 == 0:
         return 0.5
     

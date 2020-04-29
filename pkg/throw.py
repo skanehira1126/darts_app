@@ -12,6 +12,12 @@ class Throw(object):
         狙った地点からずれた距離の分散
     """
     def __init__(self, sigma):
+        """
+        Parameters
+        -----
+        sigma : float
+            狙った地点からずれた距離の分散
+        """
         self.sigma = sigma
         
     def aim(self, r, theta):
