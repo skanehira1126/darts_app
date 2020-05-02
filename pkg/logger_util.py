@@ -2,8 +2,8 @@
 from logging import getLogger, FileHandler, Formatter
 from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
 
-def init_logger(logger_name="logger", log_file_name="temp.log"):
-    logger = getLogger(logger_name)
+def init_logger(log_file_name="temp.log"):
+    logger = getLogger("darts")
     
     #ロガーのレベル
     logger.setLevel(DEBUG)
