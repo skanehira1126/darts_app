@@ -56,7 +56,7 @@ class Player(Throw, Board):
         if game_type == "01":
             #TODO : strategy_parameter不正の処理
             self._strategy = strategy.zeroone.ZeroOne(**game_params)
-            Board.__init__(self, bull_type)
+            Board.__init__(self, game_params["bull_type"])
         else :
             raise ValueError("game_type must be 01 only.")
     
