@@ -3,7 +3,7 @@ import pandas as pd
 
 from pkg.arrange_helper import ArrangeHelper
 
-class Strategy(object):
+class ZeroOne(object):
     """
     01の戦略
     
@@ -38,14 +38,14 @@ class Strategy(object):
         self.out_type = out_type
         
         #スコア格納用dfのパラメータ
-        self.columns = ["point", "n_throw", "n_pattern"]
+        columns = ["point", "n_throw", "n_pattern"]
         self.arrange_score_master = pd.DataFrame([], columns=columns)
         self.all_score_master = pd.DataFrame([], columns=columns)
         
         #スコア計算
-        self._calc_scores()
+        self._calc_scores(columns)
     
-    def _calc_scores(self):
+    def _calc_scores(self, columns):
         """
         スコアマスタを計算
         アレンジ用
@@ -64,7 +64,7 @@ class Strategy(object):
                 if flag :
                     self.arrange_score_master = pd.concat([self.arrange_score_master
                                                            , pd.DataFrame([[point, n_throw, len(point_list)]]
-                                                           , columns=self.columns)])
+                                                           , columns=columns)])
 
                 #上がりを気にしないで取得できる得点一覧
                 #out_type をeverythingにしておくと180点以内で取得できる得点のパターンを全て計算できる
@@ -73,7 +73,7 @@ class Strategy(object):
                 if flag :
                     self.all_score_master = pd.concat([self.all_score_master
                                                        , pd.DataFrame([[point, n_throw, len(point_list)]]
-                                                       , columns=self.columns)])
+                                                       , columns=columns)])
             #値をソート
             self.arrange_score_master = self.arrange_score_master.sort_values("n_pattern", axis=0, ascending=False)
             self.all_score_master = self.all_score_master.sort_values("n_pattern", axis=0, ascending=False)
@@ -137,7 +137,7 @@ class Strategy(object):
         if self.bull_type == "fat":
             aims = [[25, "inner_bull", 50]] * n_throw
         elif self.bull_type == "sepa":
-            aims = [[20, "triple", 120]] * n_throw
+            aims = [[20, "triple", 60]] * n_throw
         return aims
     
     def convert_point_list(self, point_list):

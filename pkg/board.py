@@ -66,7 +66,7 @@ class Board(object):
         
         return radious, theta
     
-    def throw(self, r, theta):
+    def calc_throw_result(self, r, theta):
         """
         ポイント計算
         
