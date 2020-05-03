@@ -271,30 +271,47 @@ class ArrangeHelper(object):
         
         Returns
         -----
-        board_place : list of [int, str]
+        board_place : list of [mark_name, place]
             ボードの場所
         
+        Notes
+        -----
+        mark_name : str
+            inner_bull, outer_bull, inner_single, outer_single,  double or triple
         """
             
+        # 上がり方に制限があるとき
         if last_flag and cls.out_type != "everything":
             if cls.out_type == "double":
-                return [int(point/2), "double"]
+                mark_name = "double"
+                place = int(point/2)
             elif  cls.out_type == "master":
+                #masterアウトではbull -> double -> singleで優先順位をつける
                 if point in cls.point_master[0]:
-                    return [25, "inner_bull"]
+                    mark_name = "inner_bull"
+                    place = 25
                 elif point in cls.point_master[2]:
-                    return [int(point/2), "double"]
+                    mark_name = "double"
+                    place = int(point/2)
                 elif point in cls.point_master[3]:
-                    return [int(point/3), "triple"]
+                    mark_name = "triple"
+                    place = int(point/3)
         else : #どれでも良い
-            for mark, points in cls.point_master.items():
-                if mark == 0:
-                    return [25, "inner_bull"]
+            for n_mark, points in cls.point_master.items():
+                if n_mark == 0:
+                    mark_name = "inner_bull"
+                    place = 25
+                    break
                 else:
                     if point in points:
-                        mark_str = cls.n_mark_master[mark]
-                        if mark_str == "bull" :
-                            mark_str = "inner_" + mark_str
-                        if mark_str == "single":
-                            mark_str = "outer_" + mark_str
-                        return [int(point/mark), mark_str]
+                        place = int(point/n_mark)
+                        mark_name = cls.n_mark_master[n_mark]
+                        if mark_name == "bull" :
+                            mark_name = "inner_" + mark_name
+                        elif mark_name == "single":
+                            mark_name = "outer_" + mark_name
+                        break
+                    else:
+                        #取得できるポイントがなかった場合
+                        continue
+        return [mark_name, place]

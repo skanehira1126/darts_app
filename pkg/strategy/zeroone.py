@@ -89,7 +89,7 @@ class ZeroOne(object):
         
          Returns
          -----
-         aims : list of board_list
+         aims : list of [point, n_mark, place]
              狙う場所のリスト
         """
         
@@ -135,15 +135,15 @@ class ZeroOne(object):
             狙う場所
         """
         if self.bull_type == "fat":
-            aims = [[25, "inner_bull", 50]] * n_throw
+            aims = [[50, "inner_bull", 25]] * n_throw
         elif self.bull_type == "sepa":
-            aims = [[20, "triple", 60]] * n_throw
+            aims = [[60, "triple", 20]] * n_throw
         return aims
     
     def convert_point_list(self, point_list):
         """
         ポイントリストを変換する
-        [p1, p2, p3] -> [[place, n_mark, point], [place, n_mark, point], [place, n_mark, point]]
+        [p1, p2, p3] -> [[point, n_mark, place],[point, n_mark, place], [point, n_mark, place]]
         
         Parameters
         -----
@@ -176,7 +176,7 @@ class ZeroOne(object):
         for idx, p in enumerate(point_list):
             last_flag = (len(point_list) == idx+1)
             board_place = ArrangeHelper.convert_point(p, last_flag)
-            board_place_list.append(board_place + [p])
+            board_place_list.append([p] + board_place)
         
         return board_place_list
                     
