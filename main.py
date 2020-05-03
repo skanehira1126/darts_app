@@ -1,65 +1,69 @@
 #!/usr/bin/env python3
-
 import time
 import sys
-import argparse
-from pprint import pprint
+from logging import getLogger
 
 from pkg.logger_util import init_logger
-from pkg.strategy import Strategy
-from pkg.board import Board
-from pkg.throw import Throw
+from pkg.player import Player
 
-import numpy as np
 
 #parameter
 bull_type = "fat"
-out_type = "double"
+out_type = "everything"
 #標準偏差
-st = Strategy(bull_type, out_type)
-sigma = 50
-throw = Throw(sigma)
+sigma = 100
 
-bd = Board(bull_type)
+init_logger("darts.log")
+logger = getLogger("darts")
 
-point = 501
+player = Player(score=501, sigma=10, game_type="01", bull_type="fat", out_type="everything")
 for round_num in range(1, 21):
-    print("=====", round_num)
-    print("left point", point)
-    aim_points = st.get_aims(point)
-    print("aim_points", aim_points)
+    logger.info("=================")
+    logger.info("Start round  {} : ".format(round_num))
+    logger.info("Point  {} : ".format(player.score))
+    #狙うポイントを計算
+    player.calc_aims()
+    #当たったところを覚えておく配列
     hit_point_list = []
-    for i in range(3):
-        r, theta = bd.get_aim_coordinate(aim_points[i][0], aim_points[i][1])
-        r, theta = throw.aim(r, theta)
-        hit_point, place, base_point = bd.throw(r=r, theta=theta)
-        print(hit_point)
-        hit_point_list.append(hit_point)
-
-        #上がりチェック
-        if point - sum(hit_point_list) == 0:
-            if out_type == "double" and (place in ["inner_bull", "double"]):
-                sys.exit(0)
-            elif out_type == "master" and (place in ["inner_bull", "outer_bull", "double", "triple"]):
-                sys.exit(0)
-            else:
-                print("BREAK")
-                hit_point_list = []
-                break
-        elif point - sum(hit_point_list) < (0 + int(out_type in ["double", "master"])):
-            print("BREAK")
+    for hit_result, throw_result in player.play():
+        point = throw_result["point"]
+        mark = throw_result["mark"]
+        place = throw_result["place"]
+        print(f"point : {point}, mark : {mark}, place : {place}")
+        logger.info(f"point : {point}, mark : {mark}, place : {place}")
+        hit_point_list.append(point)
+        
+        #BURSTチェック
+        #物理的に取れない点数になった場合
+        if player.score - sum(hit_point_list) < (0 + int(out_type in ["double", "master"])):
+            logger.info("BURST : {}".format(player.score - sum(hit_point_list) ))
             hit_point_list = []
             break
+        elif player.score - sum(hit_point_list) == 0 and (out_type in ["double", "master"]):
+            mark_rules = ["inner_bull", "double"]
+            if out_type == "master" :
+                mark_rules += ["outer_bull", "triple"]
+            if mark not in mark_rules:
+                logger.info("BURST : {}".format(player.score - sum(hit_point_list) ))
+                hit_point_list = []
+                break
 
-        #狙った場所から外した場合、再計算
-        if i != 2 and hit_point != aim_points[i][2]:
-            print("Miss and update aim_points")
-            aim_points[i+1:] = st.get_aims(point, hit_point_list)
-            print(aim_points)
-
+        #上がりチェック
+        if player.score - sum(hit_point_list) == 0:
+            if out_type == "double" and (mark in ["inner_bull", "double"]):
+                logger.info("Finished")
+                sys.exit(0)
+            elif out_type == "master" and (mark in ["inner_bull", "outer_bull", "double", "triple"]):
+                logger.info("Finished")
+                sys.exit(0)
+            elif out_type == "everything":
+                logger.info("Finished")
+                sys.exit(0)
+                
+        #外れた場合の目標再計算
+        player.calc_aims(hit_point_list)
+    
     print("hit_point_list", hit_point_list)
-    point = point - sum(hit_point_list)
+    player.score = player.score - sum(hit_point_list)
     time.sleep(1)
-
-
 
